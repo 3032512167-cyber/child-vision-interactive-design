@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.env
+.env.*
+*.local.json
+
+# Local credentials and source media are never published.
+*.docx
+/*.mp4
+src/assets/generated/anti-childism/videos/backup-before-replace-*/
+
+# Local Git metadata created during the publishing setup.
+.git-publish-backup/
+
+# Video-generation utilities are not needed by the public website.
+scripts/
+video-prompts/
+
+# Previous universe prototype code and assets stay local.
+src/book-controller.js
+src/book-data.js
+src/assets/generated/chapters/
+src/assets/generated/cosmos-gallery/
+src/assets/generated/manuscripts/
+src/assets/generated/studies/
+
+# Browser builds do not use image-generation metadata or old image variants.
+src/assets/generated/**/*.json
+src/assets/generated/anti-childism/scene-transport.webp
+src/assets/generated/anti-childism/scene-dining.webp
+src/assets/generated/anti-childism/scene-shopping.webp
+src/assets/generated/anti-childism/scene-cultural.webp

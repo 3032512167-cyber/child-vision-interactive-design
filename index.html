@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#05070d" />
+    <link rel="icon" href="data:," />
+    <title>交互设计界面</title>
+  </head>
+  <body>
+    <main id="app" aria-label="厌童主题手势交互网站">
+      <div id="scene-root" aria-hidden="true"></div>
+
+      <header class="status-bar">
+        <div class="identity">
+          <span class="identity-mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">MISOPEDIA / CHILD AVERSION</p>
+            <h1>交互设计界面</h1>
+          </div>
+        </div>
+
+        <div class="status-cluster" aria-live="polite">
+          <span class="status-light" id="status-light" aria-hidden="true"></span>
+          <span id="status-text">选择中间四个观察场景</span>
+          <button id="camera-button" class="camera-button camera-button--status" type="button">
+            <i data-lucide="camera" aria-hidden="true"></i>
+            <span>启用摄像头</span>
+          </button>
+          <button id="sound-toggle" class="icon-button" type="button" aria-label="开启视频原声" aria-pressed="false" title="开启视频原声">
+            <i data-lucide="volume-x" aria-hidden="true"></i>
+          </button>
+          <button id="mic-toggle" class="icon-button" type="button" aria-label="开启麦克风声音响应" aria-pressed="false" title="开启麦克风声音响应">
+            <i data-lucide="mic-off" aria-hidden="true"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="scene-experience" id="scene-experience" aria-label="四个厌童观察场景">
+        <div class="experience-topline">
+          <span id="scene-mode-label">FOUR SCENES</span>
+          <span id="scene-progress">01 / 04</span>
+        </div>
+
+        <section class="scene-hub" id="scene-hub">
+          <div class="hub-copy">
+            <p class="hub-kicker">OBSERVATION / SOCIAL INSTALLATION</p>
+            <h2>儿童眼中的世界</h2>
+            <p class="hub-lead">四个公共空间被重新整理成可被手势选择的场景。进入后，画面用声音、模糊、饱和度和距离变化模拟被忽略的儿童视角。</p>
+          </div>
+
+          <div class="hub-board">
+            <div class="scene-card-grid" id="scene-card-grid" aria-label="场景卡片"></div>
+          </div>
+        </section>
+
+        <section class="scene-detail" id="scene-detail" hidden aria-label="场景详情">
+          <button class="detail-back" id="detail-back" type="button" aria-label="返回四个场景">
+            <span aria-hidden="true">←</span>
+          </button>
+
+          <div class="detail-stage" aria-hidden="true">
+            <div class="detail-stage__media">
+              <video class="detail-stage__video detail-stage__video--base" id="detail-video" autoplay loop muted playsinline preload="auto"></video>
+              <video class="detail-stage__video detail-stage__video--clear" id="detail-video-clear" autoplay loop muted playsinline preload="auto"></video>
+              <span class="detail-stage__lens"></span>
+              <span class="detail-stage__trace detail-stage__trace--one"></span>
+              <span class="detail-stage__trace detail-stage__trace--two"></span>
+              <span class="detail-stage__grain"></span>
+            </div>
+            <div class="detail-stage__frame-labels">
+              <span>FIRST-PERSON FIELD STUDY</span>
+              <span>VIDEO / ORIGINAL SOUND</span>
+            </div>
+          </div>
+
+          <article class="detail-panel">
+            <p class="detail-kicker" id="detail-kicker">01 / TRANSPORTATION</p>
+            <h2 id="detail-title">长途交通</h2>
+            <p class="detail-subtitle" id="detail-subtitle">高铁、飞机里的儿童哭声与成人疲惫</p>
+            <p class="detail-summary" id="detail-summary"></p>
+          </article>
+        </section>
+      </section>
+
+      <div class="drag-hint" id="drag-hint">
+        <i data-lucide="mouse-pointer-2" aria-hidden="true"></i>
+        <span>拖动探索</span>
+      </div>
+
+      <aside class="camera-preview" id="camera-preview" aria-label="摄像头手势预览" aria-hidden="true">
+        <div class="camera-preview__header">
+          <span class="camera-preview__light" id="preview-light" aria-hidden="true"></span>
+          <span id="preview-status">正在连接</span>
+        </div>
+        <div class="camera-preview__image">
+          <video id="camera-feed" autoplay muted playsinline></video>
+          <canvas id="hand-overlay" aria-hidden="true"></canvas>
+        </div>
+      </aside>
+
+      <p id="unsupported-message" class="unsupported-message" hidden></p>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
