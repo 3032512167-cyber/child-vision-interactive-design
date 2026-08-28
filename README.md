@@ -30,6 +30,29 @@ https://你的GitHub用户名.github.io/仓库名/
 
 摄像头和麦克风只能在 HTTPS 或本机地址中使用。GitHub Pages 默认提供 HTTPS。
 
+## 免费正式域名方案
+
+如果你想要更像正式网站、又不想先买域名，推荐使用 `is-a.dev` 免费子域名。
+
+我已经把站点预设为：
+
+```text
+vision-interactive.is-a.dev
+```
+
+接入步骤：
+
+1. 去 `is-a.dev/register` 提交一个同名 JSON 文件，例如 `vision-interactive.json`。
+2. 记录里把 `CNAME` 指向你的 GitHub Pages 默认域名，通常是 `3032512167-cyber.github.io`。
+3. 在当前仓库的 `Settings > Pages` 里把 `Custom domain` 填成 `vision-interactive.is-a.dev`。
+4. 等待 GitHub 自动签发 HTTPS。
+
+绑定成功后，你的公开网址会变成：
+
+```text
+https://vision-interactive.is-a.dev/
+```
+
 ## 隐私
 
 摄像头画面和麦克风音量仅在访问者浏览器中实时处理，不上传到服务器。视频和图片作为静态资源随网页发布。
