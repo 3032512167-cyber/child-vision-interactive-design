@@ -25,7 +25,7 @@ npm run build
 公开网址通常为：
 
 ```text
-https://你的GitHub用户名.github.io/仓库名/
+https://3032512167-cyber.github.io/child-vision-interactive-design/
 ```
 
 摄像头和麦克风只能在 HTTPS 或本机地址中使用。GitHub Pages 默认提供 HTTPS。
