@@ -1788,6 +1788,11 @@ button {
   --trace-one-opacity: 0;
   --trace-two-opacity: 0;
   --grain-layer-opacity: 0.42;
+  --gesture-ghost-opacity: 0;
+  --gesture-ghost-scale: 1;
+  --gesture-ghost-offset-x: 0px;
+  --gesture-ghost-offset-y: 0px;
+  --gesture-scan-opacity: 0;
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__video--base {
@@ -1829,19 +1834,22 @@ button {
       rgba(0, 0, 0, 0) var(--lens-outer-radius)
     );
   filter:
-    grayscale(0)
-    saturate(0.4)
-    contrast(1.05)
-    brightness(0.88)
-    blur(var(--audio-clear-blur));
-  opacity: var(--clear-layer-opacity);
+    grayscale(0.2)
+    saturate(0.18)
+    contrast(1.2)
+    brightness(0.82)
+    hue-rotate(calc(var(--gesture-effect-level) * -7deg))
+    blur(calc(var(--audio-clear-blur) + var(--gesture-glitch-blur) * 0.12));
+  opacity: calc(var(--clear-layer-opacity) * 0.95);
   transform:
     translate3d(
-      calc(var(--video-shift-x, 0%) + var(--video-drift-x) + var(--audio-jitter)),
-      calc(var(--video-shift-y, 0%) + var(--video-drift-y) - var(--audio-jitter)),
+      calc(var(--video-shift-x, 0%) + var(--video-drift-x) - var(--video-clear-drift-x) + var(--audio-jitter)),
+      calc(var(--video-shift-y, 0%) + var(--video-drift-y) - var(--video-clear-drift-y) - var(--audio-jitter)),
       0
     )
-    scale(1.08);
+    scale(1.08)
+    skewX(calc(var(--gesture-skew) * -0.18));
+  mix-blend-mode: screen;
 }
 
 .detail-stage__lens,
@@ -1866,6 +1874,41 @@ button {
     0 0 56px rgba(180, 205, 255, 0.12);
   opacity: var(--lens-opacity);
   transition: top 120ms linear, left 120ms linear, width 180ms linear, opacity 240ms ease;
+}
+
+.detail-stage__lens::before,
+.detail-stage__lens::after {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.detail-stage__lens::before {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.18) 0 12%, transparent 13% 35%, rgba(255, 255, 255, 0.08) 36% 37%, transparent 38% 60%, rgba(255, 255, 255, 0.06) 61% 62%, transparent 63% 100%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%, rgba(255, 255, 255, 0.02) 74%, transparent 100%);
+  opacity: var(--gesture-ghost-opacity);
+  mix-blend-mode: screen;
+  filter: blur(1.15px);
+  transform:
+    translate3d(var(--gesture-ghost-offset-x), var(--gesture-ghost-offset-y), 0)
+    scale(var(--gesture-ghost-scale))
+    rotate(calc(var(--gesture-effect-level) * 14deg));
+}
+
+.detail-stage__lens::after {
+  inset: 4%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px);
+  opacity: calc(var(--gesture-ghost-opacity) * 0.62);
+  mix-blend-mode: overlay;
+  transform:
+    translate3d(calc(var(--gesture-ghost-offset-x) * -0.68), calc(var(--gesture-ghost-offset-y) * -0.68), 0)
+    scale(calc(var(--gesture-ghost-scale) * 0.96));
 }
 
 .detail-stage__trace {
@@ -2726,15 +2769,16 @@ button {
       rgba(0, 0, 0, 0) var(--lens-outer-radius)
     );
   background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0 16%, transparent 36%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1)),
     repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0 1px, transparent 1px 7px),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 18px);
-  backdrop-filter: grayscale(1) contrast(1.48) brightness(0.88) blur(1.8px);
+  backdrop-filter: grayscale(1) contrast(1.6) brightness(0.8) saturate(0.25) blur(calc(1.5px + var(--gesture-effect-level) * 0.7px));
   mix-blend-mode: lighten;
   transform:
     translate3d(var(--gesture-glitch-jitter-x), var(--gesture-glitch-jitter-y), 0)
     skewX(var(--gesture-overlay-skew))
-    scaleX(1.01);
+    scaleX(1.015);
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before,
@@ -2747,15 +2791,27 @@ button {
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before {
-  opacity: 0.42;
-  mix-blend-mode: normal;
-  transform: translateX(var(--gesture-rgb-offset-negative));
+  opacity: calc(0.22 + var(--gesture-scan-opacity) * 0.42);
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(180deg, transparent 0 14%, rgba(255, 255, 255, 0.28) 15% 16%, transparent 17% 41%, rgba(255, 255, 255, 0.18) 42% 43%, transparent 44% 100%),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 5px);
+  filter: blur(0.55px) contrast(1.25);
+  transform:
+    translate3d(calc(var(--gesture-rgb-offset-negative) * 1.15), calc(var(--gesture-glitch-jitter-y) * 0.32), 0)
+    skewX(calc(var(--gesture-overlay-skew) * 0.45));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::after {
-  opacity: 0.14;
-  mix-blend-mode: normal;
-  transform: translateX(var(--gesture-rgb-offset-positive));
+  opacity: calc(0.12 + var(--gesture-scan-opacity) * 0.26);
+  mix-blend-mode: soft-light;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0 22%, transparent 48%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 4px);
+  filter: blur(0.35px);
+  transform:
+    translate3d(calc(var(--gesture-rgb-offset-positive) * 1.08), 0, 0)
+    skewX(calc(var(--gesture-overlay-skew) * -0.35));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__grain {
@@ -2764,7 +2820,10 @@ button {
   z-index: 3;
   pointer-events: none;
   opacity: var(--gesture-grain-opacity);
-  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 5px);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
   mix-blend-mode: soft-light;
   -webkit-mask-image:
     radial-gradient(

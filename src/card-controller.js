@@ -358,6 +358,8 @@ export class CardController {
       const pulse = 0.45 + 0.55 * Math.sin(t * 0.26 + 0.5);
       const sound = this.soundLevel;
       const handEnergy = Math.max(0.25, this.handGestureEnergy);
+      const ghostStrength = 0.06 + this.gestureEffectLevel * 0.44 + handEnergy * 0.06;
+      const splitStrength = 0.03 + this.gestureEffectLevel * 0.18;
       const lensStrength = this.gestureActive
         ? Math.min(1, this.gestureEffectLevel * (0.65 + handEnergy * 0.28) + pulse * 0.04)
         : 0;
@@ -367,8 +369,8 @@ export class CardController {
       this.root.style.setProperty('--visual-clarity-glow', clarityGlow.toFixed(3));
       this.root.style.setProperty('--video-drift-x', `${(driftX * 0.08).toFixed(2)}px`);
       this.root.style.setProperty('--video-drift-y', `${(driftY * 0.08).toFixed(2)}px`);
-      this.root.style.setProperty('--video-clear-drift-x', `${(driftX * 0.04).toFixed(2)}px`);
-      this.root.style.setProperty('--video-clear-drift-y', `${(driftY * 0.04).toFixed(2)}px`);
+      this.root.style.setProperty('--video-clear-drift-x', `${((driftX * splitStrength) + Math.sin(t * 1.7 + this.gesturePhase) * this.gestureEffectLevel * 0.09).toFixed(2)}px`);
+      this.root.style.setProperty('--video-clear-drift-y', `${((driftY * splitStrength) + Math.cos(t * 1.3 + this.gesturePhase * 0.6) * this.gestureEffectLevel * 0.07).toFixed(2)}px`);
       this.root.style.setProperty('--lens-strength', lensStrength.toFixed(3));
       this.root.style.setProperty('--base-video-opacity', '1');
       this.root.style.setProperty('--clear-layer-opacity', (this.gestureEffectLevel * 0.98).toFixed(3));
@@ -376,6 +378,11 @@ export class CardController {
       this.root.style.setProperty('--trace-one-opacity', (this.gestureEffectLevel * (0.18 + sound * 0.08 + clarityGlow * 0.05)).toFixed(3));
       this.root.style.setProperty('--trace-two-opacity', (this.gestureEffectLevel * (0.14 + sound * 0.05)).toFixed(3));
       this.root.style.setProperty('--grain-layer-opacity', (0.14 + sound * 0.08 + this.gestureEffectLevel * 0.18).toFixed(3));
+      this.root.style.setProperty('--gesture-ghost-opacity', (ghostStrength * 0.92).toFixed(3));
+      this.root.style.setProperty('--gesture-ghost-scale', (1.02 + this.gestureEffectLevel * 0.08).toFixed(3));
+      this.root.style.setProperty('--gesture-ghost-offset-x', `${(Math.sin(t * 12.4 + this.gesturePhase) * this.gestureEffectLevel * 12.5).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-ghost-offset-y', `${(Math.cos(t * 10.2 + this.gesturePhase * 0.7) * this.gestureEffectLevel * 10.2).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-scan-opacity', (0.08 + this.gestureEffectLevel * 0.42 + sound * 0.04).toFixed(3));
       this.root.style.setProperty('--gesture-effect-level', this.gestureEffectLevel.toFixed(3));
       this.root.style.setProperty('--gesture-effect-opacity', this.gestureEffectLevel.toFixed(3));
       this.root.style.setProperty('--gesture-glitch-opacity', this.gestureEffectLevel.toFixed(3));
@@ -636,6 +643,11 @@ export class CardController {
     this.root.style.setProperty('--gesture-rgb-offset-negative', '0px');
     this.root.style.setProperty('--gesture-rgb-offset-positive', '0px');
     this.root.style.setProperty('--gesture-grain-opacity', '0.08');
+    this.root.style.setProperty('--gesture-ghost-opacity', '0');
+    this.root.style.setProperty('--gesture-ghost-scale', '1');
+    this.root.style.setProperty('--gesture-ghost-offset-x', '0px');
+    this.root.style.setProperty('--gesture-ghost-offset-y', '0px');
+    this.root.style.setProperty('--gesture-scan-opacity', '0');
     this.root.style.setProperty('--base-video-shift-x', '0%');
     this.root.style.setProperty('--base-video-shift-y', '0%');
     this.root.style.setProperty('--effect-video-shift-x', '0%');
@@ -673,6 +685,9 @@ export class CardController {
     this.root.style.setProperty('--gesture-rgb-offset-negative', `${(-6 * this.gestureEffectLevel).toFixed(2)}px`);
     this.root.style.setProperty('--gesture-rgb-offset-positive', `${(6 * this.gestureEffectLevel).toFixed(2)}px`);
     this.root.style.setProperty('--gesture-grain-opacity', (0.08 + this.gestureEffectLevel * 0.36).toFixed(3));
+    this.root.style.setProperty('--gesture-ghost-opacity', (0.08 + this.gestureEffectLevel * 0.48).toFixed(3));
+    this.root.style.setProperty('--gesture-ghost-scale', (1.02 + this.gestureEffectLevel * 0.08).toFixed(3));
+    this.root.style.setProperty('--gesture-scan-opacity', (0.12 + this.gestureEffectLevel * 0.38).toFixed(3));
     if (!this.soundEnabled) {
       this.setSoundEnabled(true, false);
     }
