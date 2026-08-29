@@ -31,6 +31,8 @@ export class CardController {
     this.lastDetailInteractionAt = 0;
     this.detailSwitchArmedUntil = 0;
     this.lastIgnoredDetailSwipeAt = 0;
+    this.carouselScrollTimer = 0;
+    this.carouselScrollProgrammaticUntil = 0;
     this.soundListener = null;
     this.micListener = null;
     this.audioController = new AudioController(this.detailVideo, {
@@ -57,6 +59,7 @@ export class CardController {
     this.bindVideoSync();
     this.applyVideoSound(false);
     this.bindFallbackControls();
+    this.bindCarouselControls();
     this.renderCards();
     this.render();
     this.startPerceptionLoop();
@@ -157,6 +160,7 @@ export class CardController {
       `;
 
       button.addEventListener('pointermove', (event) => {
+        if (event.pointerType === 'touch') return;
         const bounds = button.getBoundingClientRect();
         const x = (event.clientX - bounds.left) / bounds.width - 0.5;
         const y = (event.clientY - bounds.top) / bounds.height - 0.5;
@@ -196,6 +200,60 @@ export class CardController {
     if (this.mode === 'detail') this.renderDetail();
     this.syncHoverProgress();
     this.emitSceneChange();
+  }
+
+  bindCarouselControls() {
+    this.cardGrid.addEventListener('scroll', () => {
+      if (this.mode !== 'hub' || !this.isCompactViewport()) return;
+      if (performance.now() < this.carouselScrollProgrammaticUntil) return;
+
+      clearTimeout(this.carouselScrollTimer);
+      this.carouselScrollTimer = window.setTimeout(() => {
+        this.syncSceneFromCarousel();
+      }, 90);
+    }, { passive: true });
+  }
+
+  isCompactViewport() {
+    return window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(pointer: coarse)').matches;
+  }
+
+  syncSceneFromCarousel() {
+    if (this.mode !== 'hub' || !this.isCompactViewport()) return;
+
+    const gridRect = this.cardGrid.getBoundingClientRect();
+    const targetCenter = gridRect.left + gridRect.width / 2;
+    let nearestIndex = this.selectedIndex;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    [...this.cardGrid.children].forEach((card, index) => {
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const distance = Math.abs(cardCenter - targetCenter);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    if (nearestIndex !== this.selectedIndex) {
+      this.selectScene(nearestIndex, nearestIndex > this.selectedIndex ? 1 : -1);
+      return;
+    }
+
+    this.scrollSelectedCardIntoView('auto');
+  }
+
+  scrollSelectedCardIntoView(behavior = 'smooth') {
+    if (this.mode !== 'hub' || !this.isCompactViewport()) return;
+    const card = this.cardGrid.children[this.selectedIndex];
+    if (!card?.scrollIntoView) return;
+    this.carouselScrollProgrammaticUntil = performance.now() + (behavior === 'smooth' ? 520 : 80);
+    card.scrollIntoView({
+      behavior,
+      block: 'nearest',
+      inline: 'center',
+    });
   }
 
   renderDetail() {
@@ -517,6 +575,9 @@ export class CardController {
     this.resetGestureState(true);
     this.message(`已选中：${this.selectedScene.title}`, 'ready');
     this.render();
+    if (this.mode === 'hub') {
+      this.scrollSelectedCardIntoView('smooth');
+    }
   }
 
   enterScene() {

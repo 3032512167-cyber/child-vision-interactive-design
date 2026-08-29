@@ -71,6 +71,11 @@ cards.onSceneChange(({ index, mode, scene: selectedScene, direction }) => {
 });
 
 setStatus('选择中间四个厌童观察场景', 'ready');
+const compactLayout = window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(pointer: coarse)').matches;
+if (compactLayout) {
+  setStatus('左右滑动浏览四个场景，点击卡片进入', 'ready');
+  dragHint.querySelector('span').textContent = '左右滑动浏览';
+}
 syncSoundButton(cards.soundEnabled);
 syncMicButton(cards.micEnabled);
 

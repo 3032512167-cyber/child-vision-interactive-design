@@ -2880,3 +2880,91 @@ button {
     left: 14px;
   }
 }
+
+@media (max-width: 760px) {
+  .scene-experience[data-mode="hub"] .scene-hub {
+    width: 100%;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .scene-experience[data-mode="hub"] .hub-copy {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+    padding: 0 2px;
+  }
+
+  .scene-experience[data-mode="hub"] .hub-copy .hub-kicker {
+    margin: 0;
+  }
+
+  .scene-experience[data-mode="hub"] .hub-copy h2 {
+    font-size: clamp(28px, 8vw, 38px);
+    line-height: 1.03;
+  }
+
+  .scene-experience[data-mode="hub"] .hub-copy .hub-lead,
+  .scene-experience[data-mode="hub"] .cover-note {
+    display: none;
+  }
+
+  .scene-experience[data-mode="hub"] .scene-card-grid {
+    width: 100%;
+    height: min(72dvh, 640px);
+    min-height: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(calc(100vw - 32px), 1fr);
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 12px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pinch-zoom;
+    scrollbar-width: none;
+  }
+
+  .scene-experience[data-mode="hub"] .scene-card-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card {
+    height: 100%;
+    min-height: 0;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__media {
+    aspect-ratio: 16 / 9;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__topline {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__body {
+    right: 18px;
+    bottom: 18px;
+    left: 18px;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__title {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__subtitle {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .scene-experience[data-mode="hub"] .topic-card__metrics {
+    margin-top: 10px;
+  }
+}
