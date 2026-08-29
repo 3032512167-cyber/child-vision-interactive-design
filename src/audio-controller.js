@@ -154,8 +154,8 @@ export class AudioController {
       this.video.muted = !this.soundEnabled;
       this.video.volume = this.soundEnabled ? 0.86 : 0;
     } else {
-      this.video.muted = false;
-      this.video.volume = 1;
+      this.video.muted = !this.soundEnabled;
+      this.video.volume = this.soundEnabled ? 1 : 0;
       this.applyDynamicSound(this.level);
     }
 

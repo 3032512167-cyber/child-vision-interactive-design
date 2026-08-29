@@ -2608,6 +2608,15 @@ button {
   --gesture-glitch-jitter-y: 0px;
   --gesture-glitch-blur: 0px;
   --gesture-mask-radius: 12%;
+  --gesture-skew: 0deg;
+  --gesture-overlay-skew: 0deg;
+  --gesture-rgb-offset-negative: 0px;
+  --gesture-rgb-offset-positive: 0px;
+  --gesture-grain-opacity: 0.08;
+  --base-video-shift-x: 0%;
+  --base-video-shift-y: 0%;
+  --effect-video-shift-x: 0%;
+  --effect-video-shift-y: 0%;
 }
 
 #app[data-experience-mode="detail"] .scene-experience {
@@ -2649,15 +2658,9 @@ button {
 
 .scene-experience[data-mode="detail"] .detail-stage__video--base {
   z-index: 0;
-  filter: saturate(1.03) contrast(1.04) brightness(0.98);
+  filter: saturate(1.06) contrast(1.02) brightness(1);
   opacity: 1;
-  transform:
-    translate3d(
-      calc(var(--video-shift-x, 0%) * 0.28),
-      calc(var(--video-shift-y, 0%) * 0.28),
-      0
-    )
-    scale(1.03);
+  transform: translate3d(var(--base-video-shift-x), var(--base-video-shift-y), 0) scale(1.03);
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__video--clear {
@@ -2689,12 +2692,12 @@ button {
     blur(var(--gesture-glitch-blur));
   transform:
     translate3d(
-      calc(var(--video-shift-x, 0%) + var(--gesture-glitch-jitter-x)),
-      calc(var(--video-shift-y, 0%) + var(--gesture-glitch-jitter-y)),
+      calc(var(--effect-video-shift-x) + var(--gesture-glitch-jitter-x)),
+      calc(var(--effect-video-shift-y) + var(--gesture-glitch-jitter-y)),
       0
     )
     scale(1.06)
-    skewX(calc(var(--gesture-effect-level) * -3deg));
+    skewX(var(--gesture-skew));
   mix-blend-mode: normal;
 }
 
@@ -2728,7 +2731,7 @@ button {
   mix-blend-mode: screen;
   transform:
     translate3d(var(--gesture-glitch-jitter-x), var(--gesture-glitch-jitter-y), 0)
-    skewX(calc(var(--gesture-effect-level) * -4deg));
+    skewX(var(--gesture-overlay-skew));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before,
@@ -2743,13 +2746,13 @@ button {
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before {
   opacity: 0.56;
   mix-blend-mode: screen;
-  transform: translateX(calc(var(--gesture-effect-level) * -6px));
+  transform: translateX(var(--gesture-rgb-offset-negative));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::after {
   opacity: 0.18;
   mix-blend-mode: difference;
-  transform: translateX(calc(var(--gesture-effect-level) * 6px));
+  transform: translateX(var(--gesture-rgb-offset-positive));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__grain {
@@ -2757,7 +2760,7 @@ button {
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: calc(var(--gesture-effect-level) * 0.36 + 0.08);
+  opacity: var(--gesture-grain-opacity);
   background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 5px);
   mix-blend-mode: soft-light;
   -webkit-mask-image:

@@ -322,6 +322,11 @@ export class CardController {
       this.root.style.setProperty('--gesture-glitch-jitter-y', `${(Math.cos(t * 19.1 + this.gesturePhase * 0.7) * this.gestureEffectLevel * 5.5).toFixed(2)}px`);
       this.root.style.setProperty('--gesture-glitch-blur', `${(this.gestureEffectLevel * 2.4).toFixed(2)}px`);
       this.root.style.setProperty('--gesture-mask-radius', `${(12 + this.gestureEffectLevel * 10).toFixed(2)}%`);
+      this.root.style.setProperty('--gesture-skew', `${(-3 * this.gestureEffectLevel).toFixed(2)}deg`);
+      this.root.style.setProperty('--gesture-overlay-skew', `${(-4 * this.gestureEffectLevel).toFixed(2)}deg`);
+      this.root.style.setProperty('--gesture-rgb-offset-negative', `${(-6 * this.gestureEffectLevel).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-rgb-offset-positive', `${(6 * this.gestureEffectLevel).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-grain-opacity', (0.08 + this.gestureEffectLevel * 0.36).toFixed(3));
       this.root.dataset.gestureActive = String(this.gestureActive);
       this.audioController.setFearIntensity(this.gestureEffectLevel);
       this.perceptionFrame = requestAnimationFrame(tick);
@@ -368,6 +373,10 @@ export class CardController {
     this.root.style.setProperty('--trace-y-2', `${this.tracePoints[1].y}%`);
     this.root.style.setProperty('--video-shift-x', `${(displayHandX * 1.6).toFixed(2)}%`);
     this.root.style.setProperty('--video-shift-y', `${((input.handY ?? 0) * 1.2).toFixed(2)}%`);
+    this.root.style.setProperty('--base-video-shift-x', `${(displayHandX * 0.38).toFixed(2)}%`);
+    this.root.style.setProperty('--base-video-shift-y', `${((input.handY ?? 0) * 0.28).toFixed(2)}%`);
+    this.root.style.setProperty('--effect-video-shift-x', `${(displayHandX * 1.45).toFixed(2)}%`);
+    this.root.style.setProperty('--effect-video-shift-y', `${((input.handY ?? 0) * 1.05).toFixed(2)}%`);
     this.root.style.setProperty('--lens-strength', (0.55 + gestureEnergy * 0.5).toFixed(3));
 
     const selectedCard = this.cardGrid.children[this.selectedIndex];
@@ -528,6 +537,15 @@ export class CardController {
     this.root.style.setProperty('--gesture-glitch-jitter-y', '0px');
     this.root.style.setProperty('--gesture-glitch-blur', '0px');
     this.root.style.setProperty('--gesture-mask-radius', '12%');
+    this.root.style.setProperty('--gesture-skew', '0deg');
+    this.root.style.setProperty('--gesture-overlay-skew', '0deg');
+    this.root.style.setProperty('--gesture-rgb-offset-negative', '0px');
+    this.root.style.setProperty('--gesture-rgb-offset-positive', '0px');
+    this.root.style.setProperty('--gesture-grain-opacity', '0.08');
+    this.root.style.setProperty('--base-video-shift-x', '0%');
+    this.root.style.setProperty('--base-video-shift-y', '0%');
+    this.root.style.setProperty('--effect-video-shift-x', '0%');
+    this.root.style.setProperty('--effect-video-shift-y', '0%');
     this.audioController.setFearIntensity(0);
     if (disableSound && this.soundEnabled) {
       this.setSoundEnabled(false, false);
@@ -556,6 +574,11 @@ export class CardController {
     this.root.style.setProperty('--gesture-effect-opacity', this.gestureEffectLevel.toFixed(3));
     this.root.style.setProperty('--gesture-glitch-opacity', this.gestureEffectLevel.toFixed(3));
     this.root.style.setProperty('--gesture-mask-radius', `${(12 + this.gestureEffectLevel * 10).toFixed(2)}%`);
+    this.root.style.setProperty('--gesture-skew', `${(-3 * this.gestureEffectLevel).toFixed(2)}deg`);
+    this.root.style.setProperty('--gesture-overlay-skew', `${(-4 * this.gestureEffectLevel).toFixed(2)}deg`);
+    this.root.style.setProperty('--gesture-rgb-offset-negative', `${(-6 * this.gestureEffectLevel).toFixed(2)}px`);
+    this.root.style.setProperty('--gesture-rgb-offset-positive', `${(6 * this.gestureEffectLevel).toFixed(2)}px`);
+    this.root.style.setProperty('--gesture-grain-opacity', (0.08 + this.gestureEffectLevel * 0.36).toFixed(3));
     if (!this.soundEnabled) {
       this.setSoundEnabled(true, false);
     }
