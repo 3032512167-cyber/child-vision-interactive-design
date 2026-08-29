@@ -2658,6 +2658,8 @@ button {
   --gesture-rgb-offset-negative: 0px;
   --gesture-rgb-offset-positive: 0px;
   --gesture-grain-opacity: 0.08;
+  --gesture-cut-opacity: 0;
+  --gesture-fracture-opacity: 0;
   --base-video-shift-x: 0%;
   --base-video-shift-y: 0%;
   --effect-video-shift-x: 0%;
@@ -2812,6 +2814,171 @@ button {
   transform:
     translate3d(calc(var(--gesture-rgb-offset-positive) * 1.08), 0, 0)
     skewX(calc(var(--gesture-overlay-skew) * -0.35));
+}
+
+/* The circle is a live interference field: hard cuts and short offsets keep it
+   closer to a broken signal than a soft filter. The parent mask confines every
+   layer to the user's temporary field of vision. */
+.scene-experience[data-mode="detail"] .detail-stage__glitch {
+  overflow: hidden;
+  isolation: isolate;
+  animation: gesture-glitch-field 1.18s steps(7, end) infinite;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice,
+.scene-experience[data-mode="detail"] .glitch-fracture {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice {
+  left: -8%;
+  width: 116%;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 8%,
+      rgba(110, 238, 255, 0.48) 8% 10%,
+      transparent 10% 28%,
+      rgba(255, 255, 255, 0.32) 28% 42%,
+      transparent 42% 63%,
+      rgba(218, 174, 255, 0.42) 63% 67%,
+      transparent 67% 86%,
+      rgba(255, 224, 151, 0.34) 86% 90%,
+      transparent 90%
+    ),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 3px);
+  background-blend-mode: screen;
+  mix-blend-mode: screen;
+  opacity: calc(0.16 + var(--gesture-effect-level) * 0.8);
+  filter: grayscale(0.88) contrast(2.15) brightness(1.28) blur(0.35px);
+  backdrop-filter: grayscale(1) contrast(1.7) brightness(1.08) blur(1.2px);
+  will-change: transform, clip-path;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice--one {
+  top: 16%;
+  height: 8%;
+  clip-path: polygon(0 14%, 22% 8%, 38% 22%, 58% 4%, 76% 18%, 100% 0, 100% 84%, 79% 74%, 62% 92%, 42% 78%, 18% 100%, 0 82%);
+  animation: gesture-glitch-slice-one 1.42s steps(5, end) infinite;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice--two {
+  top: 39%;
+  height: 5.5%;
+  clip-path: polygon(0 0, 18% 18%, 44% 5%, 68% 24%, 100% 10%, 100% 100%, 74% 82%, 50% 96%, 26% 76%, 0 92%);
+  animation: gesture-glitch-slice-two 1.86s steps(6, end) infinite reverse;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice--three {
+  top: 60%;
+  height: 10%;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(218, 174, 255, 0.38) 0 12%,
+      transparent 12% 24%,
+      rgba(255, 255, 255, 0.26) 24% 52%,
+      transparent 52% 70%,
+      rgba(110, 238, 255, 0.42) 70% 78%,
+      transparent 78%
+    ),
+    repeating-linear-gradient(180deg, transparent 0 4px, rgba(255, 255, 255, 0.26) 4px 5px, transparent 5px 9px);
+  clip-path: polygon(0 24%, 14% 0, 36% 16%, 55% 4%, 82% 22%, 100% 12%, 100% 86%, 83% 100%, 58% 78%, 33% 94%, 11% 76%, 0 88%);
+  animation: gesture-glitch-slice-three 1.12s steps(4, end) infinite;
+}
+
+.scene-experience[data-mode="detail"] .glitch-slice--four {
+  top: 79%;
+  height: 4.2%;
+  opacity: calc(0.12 + var(--gesture-effect-level) * 0.68);
+  clip-path: polygon(0 30%, 27% 0, 61% 22%, 100% 8%, 100% 88%, 66% 100%, 31% 72%, 0 100%);
+  animation: gesture-glitch-slice-four 2.08s steps(7, end) infinite reverse;
+}
+
+.scene-experience[data-mode="detail"] .glitch-fracture {
+  left: 50%;
+  width: 42%;
+  height: 2px;
+  transform-origin: center;
+  background:
+    linear-gradient(90deg, transparent, rgba(110, 238, 255, 0.8) 18%, rgba(255, 255, 255, 0.9) 50%, rgba(218, 174, 255, 0.7) 82%, transparent);
+  box-shadow: 0 0 12px rgba(110, 238, 255, 0.24);
+  mix-blend-mode: screen;
+  opacity: calc(0.14 + var(--gesture-effect-level) * 0.72);
+  will-change: transform, clip-path;
+}
+
+.scene-experience[data-mode="detail"] .glitch-fracture--one {
+  top: 31%;
+  clip-path: polygon(0 0, 21% 38%, 47% 0, 74% 62%, 100% 12%, 100% 100%, 72% 75%, 49% 100%, 20% 66%, 0 100%);
+  animation: gesture-fracture-one 1.64s steps(5, end) infinite;
+}
+
+.scene-experience[data-mode="detail"] .glitch-fracture--two {
+  top: 72%;
+  width: 30%;
+  opacity: calc(0.12 + var(--gesture-effect-level) * 0.58);
+  clip-path: polygon(0 30%, 28% 0, 56% 48%, 83% 10%, 100% 34%, 100% 100%, 72% 68%, 46% 100%, 20% 52%, 0 86%);
+  animation: gesture-fracture-two 1.28s steps(4, end) infinite reverse;
+}
+
+@keyframes gesture-glitch-field {
+  0%, 100% { background-position: 0 0, 0 0, 0 0, 0 0; }
+  24% { background-position: 0 8px, 11px 0, 0 0, 0 0; }
+  27% { background-position: 0 -4px, -16px 0, 0 0, 0 0; }
+  31% { background-position: 0 15px, 5px 0, 0 0, 0 0; }
+  67% { background-position: 0 2px, -9px 0, 0 0, 0 0; }
+  70% { background-position: 0 -12px, 17px 0, 0 0, 0 0; }
+}
+
+@keyframes gesture-glitch-slice-one {
+  0%, 18%, 100% { transform: translate3d(0, 0, 0) skewX(0deg); }
+  22% { transform: translate3d(-3.2%, 2px, 0) skewX(-2deg); }
+  26% { transform: translate3d(4.8%, -1px, 0) skewX(1deg); }
+  30% { transform: translate3d(-1.4%, 1px, 0) skewX(0deg); }
+}
+
+@keyframes gesture-glitch-slice-two {
+  0%, 36%, 100% { transform: translate3d(0, 0, 0) skewX(0deg); }
+  41% { transform: translate3d(5.2%, -1px, 0) skewX(2deg); }
+  45% { transform: translate3d(-4.4%, 2px, 0) skewX(-1deg); }
+  50% { transform: translate3d(1.8%, 0, 0) skewX(0deg); }
+}
+
+@keyframes gesture-glitch-slice-three {
+  0%, 52%, 100% { transform: translate3d(0, 0, 0) skewX(0deg) scaleY(1); }
+  56% { transform: translate3d(-2.5%, -2px, 0) skewX(-3deg) scaleY(1.12); }
+  60% { transform: translate3d(3.8%, 1px, 0) skewX(2deg) scaleY(0.84); }
+  64% { transform: translate3d(-0.8%, 0, 0) skewX(0deg) scaleY(1); }
+}
+
+@keyframes gesture-glitch-slice-four {
+  0%, 70%, 100% { transform: translate3d(0, 0, 0); }
+  74% { transform: translate3d(6%, -1px, 0); }
+  78% { transform: translate3d(-5%, 1px, 0); }
+  82% { transform: translate3d(0.5%, 0, 0); }
+}
+
+@keyframes gesture-fracture-one {
+  0%, 42%, 100% { transform: translateX(-50%) scaleX(0.72) rotate(-3deg); }
+  47% { transform: translateX(-46%) scaleX(1.2) rotate(2deg); }
+  52% { transform: translateX(-56%) scaleX(0.54) rotate(-1deg); }
+}
+
+@keyframes gesture-fracture-two {
+  0%, 62%, 100% { transform: translateX(-50%) scaleX(0.62) rotate(4deg); }
+  68% { transform: translateX(-42%) scaleX(1.24) rotate(-2deg); }
+  73% { transform: translateX(-59%) scaleX(0.4) rotate(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-experience[data-mode="detail"] .detail-stage__glitch,
+  .scene-experience[data-mode="detail"] .glitch-slice,
+  .scene-experience[data-mode="detail"] .glitch-fracture {
+    animation: none;
+  }
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__grain {
