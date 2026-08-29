@@ -1859,11 +1859,11 @@ button {
   max-width: 430px;
   min-width: 150px;
   aspect-ratio: 1;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.58);
   border-radius: 50%;
   box-shadow:
-    inset 0 0 34px rgba(255, 255, 255, 0.025),
-    0 0 56px color-mix(in srgb, var(--scene-accent) 18%, transparent);
+    inset 0 0 34px rgba(255, 255, 255, 0.03),
+    0 0 56px rgba(180, 205, 255, 0.12);
   opacity: var(--lens-opacity);
   transition: top 120ms linear, left 120ms linear, width 180ms linear, opacity 240ms ease;
 }
@@ -1874,7 +1874,9 @@ button {
   min-width: 118px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--scene-accent) 18%, transparent);
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.2) 0 36%, rgba(255, 255, 255, 0.08) 52%, transparent 74%),
+    rgba(255, 255, 255, 0.03);
   mix-blend-mode: screen;
   opacity: var(--trace-one-opacity);
   filter: blur(14px);
@@ -2724,14 +2726,15 @@ button {
       rgba(0, 0, 0, 0) var(--lens-outer-radius)
     );
   background:
-    linear-gradient(90deg, rgba(255, 15, 104, 0.16), transparent 24%, transparent 76%, rgba(112, 232, 255, 0.16)),
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 8px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.06));
-  backdrop-filter: grayscale(1) contrast(1.42) brightness(0.92) blur(2px);
-  mix-blend-mode: screen;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 18px);
+  backdrop-filter: grayscale(1) contrast(1.48) brightness(0.88) blur(1.8px);
+  mix-blend-mode: lighten;
   transform:
     translate3d(var(--gesture-glitch-jitter-x), var(--gesture-glitch-jitter-y), 0)
-    skewX(var(--gesture-overlay-skew));
+    skewX(var(--gesture-overlay-skew))
+    scaleX(1.01);
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before,
@@ -2744,14 +2747,14 @@ button {
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::before {
-  opacity: 0.56;
-  mix-blend-mode: screen;
+  opacity: 0.42;
+  mix-blend-mode: normal;
   transform: translateX(var(--gesture-rgb-offset-negative));
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__glitch::after {
-  opacity: 0.18;
-  mix-blend-mode: difference;
+  opacity: 0.14;
+  mix-blend-mode: normal;
   transform: translateX(var(--gesture-rgb-offset-positive));
 }
 
@@ -2784,8 +2787,8 @@ button {
 .scene-experience[data-mode="detail"] .detail-stage__lens {
   opacity: var(--lens-opacity);
   box-shadow:
-    inset 0 0 34px rgba(255, 255, 255, 0.02),
-    0 0 58px color-mix(in srgb, var(--scene-accent) 22%, transparent);
+    inset 0 0 34px rgba(255, 255, 255, 0.03),
+    0 0 58px rgba(180, 205, 255, 0.12);
 }
 
 .scene-experience[data-mode="detail"] .detail-stage__trace {
