@@ -20,6 +20,7 @@ export class CardController {
     this.micEnabled = false;
     this.soundLevel = 0;
     this.handGestureEnergy = 0;
+    this.lensAudioIntensity = 0;
     this.gestureActive = false;
     this.gestureEffectLevel = 0;
     this.lastGestureAt = 0;
@@ -28,6 +29,8 @@ export class CardController {
     this.lastPerceptionAt = 0;
     this.lastHandAt = 0;
     this.lastDetailInteractionAt = 0;
+    this.detailSwitchArmedUntil = 0;
+    this.lastIgnoredDetailSwipeAt = 0;
     this.soundListener = null;
     this.micListener = null;
     this.audioController = new AudioController(this.detailVideo, {
@@ -327,8 +330,12 @@ export class CardController {
       this.root.style.setProperty('--gesture-rgb-offset-negative', `${(-6 * this.gestureEffectLevel).toFixed(2)}px`);
       this.root.style.setProperty('--gesture-rgb-offset-positive', `${(6 * this.gestureEffectLevel).toFixed(2)}px`);
       this.root.style.setProperty('--gesture-grain-opacity', (0.08 + this.gestureEffectLevel * 0.36).toFixed(3));
+      const audioFearIntensity = this.gestureActive
+        ? this.lensAudioIntensity
+        : 0;
+      this.root.style.setProperty('--audio-gesture-intensity', audioFearIntensity.toFixed(3));
       this.root.dataset.gestureActive = String(this.gestureActive);
-      this.audioController.setFearIntensity(this.gestureEffectLevel);
+      this.audioController.setFearIntensity(audioFearIntensity);
       this.perceptionFrame = requestAnimationFrame(tick);
     };
 
@@ -352,9 +359,11 @@ export class CardController {
     const lensX = 50 + displayHandX * 34;
     const lensY = 50 + Math.max(-1, Math.min(1, input.handY ?? 0)) * 28;
     const openness = Math.max(input.openness ?? 0, input.spread ?? 0);
-    const gestureEnergy = Math.max(input.motionEnergy ?? 0, openness);
+    const motionEnergy = input.motionEnergy ?? 0;
+    const gestureEnergy = Math.max(motionEnergy, openness);
+    this.lensAudioIntensity = Math.min(1, Math.max(0, openness));
     this.handGestureEnergy = gestureEnergy;
-    const lensSize = 13 + gestureEnergy * 16;
+    const lensSize = 12 + openness * 20;
     this.tracePoints[0].x += (lensX - this.tracePoints[0].x) * 0.34;
     this.tracePoints[0].y += (lensY - this.tracePoints[0].y) * 0.34;
     this.tracePoints[1].x += (this.tracePoints[0].x - this.tracePoints[1].x) * 0.22;
@@ -403,8 +412,28 @@ export class CardController {
     }
 
     if (this.mode === 'detail') {
-      if (input.swipe === 'left') this.selectScene(this.selectedIndex + 1, 1);
-      if (input.swipe === 'right') this.selectScene(this.selectedIndex - 1, -1);
+      const now = performance.now();
+
+      if (pinchDown) {
+        this.detailSwitchArmedUntil = now + 2200;
+        this.triggerDetailGesture(0.3, input);
+        this.message('切换模式：2 秒内左右挥动切换场景', 'ready');
+        return;
+      }
+
+      if (input.swipe) {
+        if (now <= this.detailSwitchArmedUntil) {
+          const direction = input.swipe === 'left' ? 1 : -1;
+          this.detailSwitchArmedUntil = 0;
+          this.selectScene(this.selectedIndex + direction, direction);
+          return;
+        }
+
+        if (now - this.lastIgnoredDetailSwipeAt > 1400) {
+          this.lastIgnoredDetailSwipeAt = now;
+          this.message('场景内已锁定：先捏合，再左右挥动切换场景', 'ready');
+        }
+      }
 
       if (input.handDepth > 0.52 && !this.isContrasting) {
         this.toggleContrast(true);
@@ -527,11 +556,15 @@ export class CardController {
   resetGestureState(disableSound = true) {
     this.gestureActive = false;
     this.gestureEffectLevel = 0;
+    this.lensAudioIntensity = 0;
     this.lastGestureAt = 0;
     this.lastDetailInteractionAt = 0;
+    this.detailSwitchArmedUntil = 0;
+    this.lastIgnoredDetailSwipeAt = 0;
     this.root.dataset.gestureActive = 'false';
     this.root.style.setProperty('--gesture-effect-level', '0');
     this.root.style.setProperty('--gesture-effect-opacity', '0');
+    this.root.style.setProperty('--audio-gesture-intensity', '0');
     this.root.style.setProperty('--gesture-glitch-opacity', '0');
     this.root.style.setProperty('--gesture-glitch-jitter-x', '0px');
     this.root.style.setProperty('--gesture-glitch-jitter-y', '0px');
@@ -582,7 +615,7 @@ export class CardController {
     if (!this.soundEnabled) {
       this.setSoundEnabled(true, false);
     }
-    this.audioController.setFearIntensity(this.gestureEffectLevel);
+    this.audioController.setFearIntensity(this.lensAudioIntensity);
     if (input.swipe) {
       this.message(input.swipe === 'left' ? '手势触发：故障层已开启' : '手势触发：故障层已开启', 'ready');
     }

@@ -215,7 +215,7 @@ export class GestureController {
     this.previousOpenness = openness;
 
     if (swipe) {
-      this.setStatus(swipe === 'left' ? '向左滑动：选择下一个场景' : '向右滑动：选择上一个场景', 'ready');
+      this.setStatus(swipe === 'left' ? '向左滑动' : '向右滑动', 'ready');
     } else if (Math.abs(scaleDelta) > 0.008 && timestamp - this.lastActionStatusAt > 180) {
       this.lastActionStatusAt = timestamp;
       this.setStatus(scaleDelta > 0 ? '张开放大' : '握紧缩小', 'ready');

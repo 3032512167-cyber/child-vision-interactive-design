@@ -194,11 +194,11 @@ export class AudioController {
     if (!this.context || !this.outputGain) return;
     const now = this.context.currentTime;
     const fear = this.clamp(this.fearIntensity, 0, 1);
-    const volume = this.soundEnabled ? 0.02 + fear * 0.82 + level * 0.36 : 0;
+    const volume = this.soundEnabled ? 0.01 + fear * 1.02 + level * 0.14 : 0;
     this.outputGain.gain.setTargetAtTime(volume, now, 0.045);
-    this.highPassFilter.frequency.setTargetAtTime(110 + fear * 190 + level * 70, now, 0.08);
-    this.peakingFilter.gain.setTargetAtTime(2 + fear * 8 + level * 7, now, 0.055);
-    this.highShelfFilter.gain.setTargetAtTime(4 + fear * 14 + level * 10, now, 0.055);
+    this.highPassFilter.frequency.setTargetAtTime(100 + fear * 220 + level * 28, now, 0.08);
+    this.peakingFilter.gain.setTargetAtTime(1 + fear * 11 + level * 2, now, 0.055);
+    this.highShelfFilter.gain.setTargetAtTime(3 + fear * 18 + level * 4, now, 0.055);
   }
 
   setFearIntensity(value) {
