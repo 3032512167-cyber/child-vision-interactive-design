@@ -34,7 +34,7 @@ https://3032512167-cyber.github.io/child-vision-interactive-design/
 
 如果你想要更像正式网站、又不想先买域名，推荐使用 `is-a.dev` 免费子域名。
 
-我已经把站点预设为：
+计划申请的域名为：
 
 ```text
 vision-interactive.is-a.dev
@@ -51,6 +51,12 @@ vision-interactive.is-a.dev
 
 ```text
 https://vision-interactive.is-a.dev/
+```
+
+如果申请尚未通过，请继续使用 GitHub Pages 默认地址：
+
+```text
+https://3032512167-cyber.github.io/child-vision-interactive-design/
 ```
 
 ## 隐私
