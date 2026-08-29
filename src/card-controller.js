@@ -16,6 +16,8 @@ export class CardController {
     this.detailSummary = document.querySelector('#detail-summary');
     this.detailVideo = document.querySelector('#detail-video');
     this.detailClearVideo = document.querySelector('#detail-video-clear');
+    this.detailCyanVideo = document.querySelector('#detail-video-cyan');
+    this.detailAmberVideo = document.querySelector('#detail-video-amber');
     this.soundEnabled = false;
     this.micEnabled = false;
     this.soundLevel = 0;
@@ -116,12 +118,15 @@ export class CardController {
 
   bindVideoSync() {
     if (!this.detailVideo || !this.detailClearVideo) return;
+    const auxiliaryVideos = [this.detailClearVideo, this.detailCyanVideo, this.detailAmberVideo].filter(Boolean);
     const sync = () => {
       if (!Number.isFinite(this.detailVideo.currentTime)) return;
-      if (Math.abs((this.detailClearVideo.currentTime || 0) - this.detailVideo.currentTime) > 0.08) {
-        this.detailClearVideo.currentTime = this.detailVideo.currentTime;
-      }
-      this.detailClearVideo.playbackRate = this.detailVideo.playbackRate || 1;
+      auxiliaryVideos.forEach((video) => {
+        if (Math.abs((video.currentTime || 0) - this.detailVideo.currentTime) > 0.08) {
+          video.currentTime = this.detailVideo.currentTime;
+        }
+        video.playbackRate = this.detailVideo.playbackRate || 1;
+      });
     };
 
     ['play', 'timeupdate', 'seeked', 'ratechange', 'loadedmetadata'].forEach((eventName) => {
@@ -269,8 +274,16 @@ export class CardController {
       this.detailClearVideo.dataset.source = scene.video;
       this.detailClearVideo.poster = scene.image;
       this.detailClearVideo.src = scene.video;
+      [this.detailCyanVideo, this.detailAmberVideo].filter(Boolean).forEach((video) => {
+        video.dataset.source = scene.video;
+        video.poster = scene.image;
+        video.src = scene.video;
+        video.muted = true;
+      });
       this.detailVideo.load();
       this.detailClearVideo.load();
+      this.detailCyanVideo?.load();
+      this.detailAmberVideo?.load();
       this.resetGestureState(true);
     }
     this.applyVideoSound(false);
@@ -308,6 +321,9 @@ export class CardController {
     this.syncClearVideo();
     const clearPlayPromise = this.detailClearVideo.play();
     clearPlayPromise?.catch?.(() => {});
+    [this.detailCyanVideo, this.detailAmberVideo].filter(Boolean).forEach((video) => {
+      video.play().catch(() => {});
+    });
 
     const playPromise = this.detailVideo.play();
     if (!playPromise?.catch) return;
@@ -410,10 +426,12 @@ export class CardController {
   syncClearVideo() {
     if (!this.detailClearVideo || !this.detailVideo) return;
     const baseTime = this.detailVideo.currentTime || 0;
-    if (Number.isFinite(baseTime) && Math.abs((this.detailClearVideo.currentTime || 0) - baseTime) > 0.18) {
-      this.detailClearVideo.currentTime = baseTime;
-    }
-    this.detailClearVideo.playbackRate = this.detailVideo.playbackRate || 1;
+    [this.detailClearVideo, this.detailCyanVideo, this.detailAmberVideo].filter(Boolean).forEach((video) => {
+      if (Number.isFinite(baseTime) && Math.abs((video.currentTime || 0) - baseTime) > 0.18) {
+        video.currentTime = baseTime;
+      }
+      video.playbackRate = this.detailVideo.playbackRate || 1;
+    });
   }
 
   handleInput(input) {
