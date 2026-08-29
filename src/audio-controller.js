@@ -5,8 +5,10 @@ export class AudioController {
     this.onMessage = onMessage;
     this.soundEnabled = false;
     this.micEnabled = false;
+    this.fearIntensity = 0;
     this.context = null;
     this.sourceNode = null;
+    this.highPassFilter = null;
     this.peakingFilter = null;
     this.highShelfFilter = null;
     this.compressor = null;
@@ -30,6 +32,13 @@ export class AudioController {
       this.onMessage?.(error.message || '无法开启视频原声。', 'error');
     });
     return this.soundEnabled;
+  }
+
+  async prepareSilentAudio() {
+    await this.ensureGraph();
+    this.soundEnabled = false;
+    this.fearIntensity = 0;
+    this.applyDynamicSound(this.level);
   }
 
   toggleSound() {
@@ -97,6 +106,11 @@ export class AudioController {
       }
 
       this.context = new AudioContextClass();
+      this.highPassFilter = this.context.createBiquadFilter();
+      this.highPassFilter.type = 'highpass';
+      this.highPassFilter.frequency.value = 120;
+      this.highPassFilter.Q.value = 0.72;
+
       this.peakingFilter = this.context.createBiquadFilter();
       this.peakingFilter.type = 'peaking';
       this.peakingFilter.frequency.value = 2300;
@@ -122,6 +136,7 @@ export class AudioController {
     if (!this.sourceNode) {
       this.sourceNode = this.context.createMediaElementSource(this.video);
       this.sourceNode
+        .connect(this.highPassFilter)
         .connect(this.peakingFilter)
         .connect(this.highShelfFilter)
         .connect(this.compressor)
@@ -178,10 +193,17 @@ export class AudioController {
   applyDynamicSound(level) {
     if (!this.context || !this.outputGain) return;
     const now = this.context.currentTime;
-    const volume = this.soundEnabled ? 0.72 + level * 0.72 : 0;
+    const fear = this.clamp(this.fearIntensity, 0, 1);
+    const volume = this.soundEnabled ? 0.02 + fear * 0.82 + level * 0.36 : 0;
     this.outputGain.gain.setTargetAtTime(volume, now, 0.045);
-    this.peakingFilter.gain.setTargetAtTime(level * 11, now, 0.055);
-    this.highShelfFilter.gain.setTargetAtTime(level * 14, now, 0.055);
+    this.highPassFilter.frequency.setTargetAtTime(110 + fear * 190 + level * 70, now, 0.08);
+    this.peakingFilter.gain.setTargetAtTime(2 + fear * 8 + level * 7, now, 0.055);
+    this.highShelfFilter.gain.setTargetAtTime(4 + fear * 14 + level * 10, now, 0.055);
+  }
+
+  setFearIntensity(value) {
+    this.fearIntensity = this.clamp(value, 0, 1);
+    this.applyDynamicSound(this.level);
   }
 
   dispose() {

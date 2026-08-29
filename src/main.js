@@ -92,6 +92,7 @@ cameraButton.addEventListener('click', async () => {
   cameraButton.disabled = true;
   cameraButton.querySelector('span').textContent = '正在连接';
   try {
+    void cards.prepareSilentAudio();
     await gestures.startCamera();
     app.dataset.cameraConnected = 'true';
     dragHint.dataset.hidden = 'true';

@@ -20,8 +20,14 @@ export class CardController {
     this.micEnabled = false;
     this.soundLevel = 0;
     this.handGestureEnergy = 0;
+    this.gestureActive = false;
+    this.gestureEffectLevel = 0;
+    this.lastGestureAt = 0;
+    this.gesturePhase = Math.random() * Math.PI * 2;
     this.perceptionFrame = null;
+    this.lastPerceptionAt = 0;
     this.lastHandAt = 0;
+    this.lastDetailInteractionAt = 0;
     this.soundListener = null;
     this.micListener = null;
     this.audioController = new AudioController(this.detailVideo, {
@@ -169,6 +175,7 @@ export class CardController {
     const scene = this.selectedScene;
     this.root.dataset.mode = this.mode;
     this.root.dataset.contrast = String(this.isContrasting);
+    this.root.dataset.gestureActive = String(this.gestureActive);
     this.root.style.setProperty('--scene-accent', scene.accent);
     this.root.style.setProperty('--scene-warm', scene.warm);
     this.root.style.setProperty('--scene-tone', scene.tone);
@@ -203,14 +210,23 @@ export class CardController {
       this.detailClearVideo.src = scene.video;
       this.detailVideo.load();
       this.detailClearVideo.load();
+      this.resetGestureState(true);
     }
     this.applyVideoSound(false);
     this.playDetailVideo();
   }
 
-  setSoundEnabled(enabled) {
+  async prepareSilentAudio() {
+    try {
+      await this.audioController.prepareSilentAudio();
+    } catch (error) {
+      this.message(error.message || '无法预热音频。', 'error');
+    }
+  }
+
+  setSoundEnabled(enabled, shouldRetry = true) {
     this.soundEnabled = Boolean(enabled);
-    this.applyVideoSound();
+    this.applyVideoSound(shouldRetry);
     this.soundListener?.(this.soundEnabled);
     return this.soundEnabled;
   }
@@ -262,42 +278,52 @@ export class CardController {
   applySoundLevel(level) {
     this.soundLevel = level;
     this.root.style.setProperty('--sound-intensity', level.toFixed(3));
-    this.root.style.setProperty('--audio-base-blur', `${(5.2 + level * 6.8).toFixed(2)}px`);
-    this.root.style.setProperty('--audio-clear-blur', '0px');
-    this.root.style.setProperty('--audio-jitter', `${(level * 5.5).toFixed(2)}px`);
-    this.root.style.setProperty('--audio-grain-opacity', (0.38 + level * 0.24).toFixed(2));
-    this.root.style.setProperty('--audio-clarity-pulse', (0.04 + level * 0.08).toFixed(3));
   }
 
   startPerceptionLoop() {
     const tick = (now) => {
       const t = now / 1000;
+      const delta = this.lastPerceptionAt ? (now - this.lastPerceptionAt) / 1000 : 0.016;
+      this.lastPerceptionAt = now;
       const breath = 0.5 + 0.5 * Math.sin(t * 0.42);
       const idleFor = this.lastHandAt > 0 ? now - this.lastHandAt : Number.POSITIVE_INFINITY;
       const handFreshness = Number.isFinite(idleFor) ? Math.max(0, 1 - idleFor / 860) : 0;
+      const detailIdle = this.lastGestureAt > 0 ? now - this.lastGestureAt : Number.POSITIVE_INFINITY;
+      const detailFreshness = this.mode === 'detail' ? Math.max(0, 1 - detailIdle / 920) : 0;
+      this.gestureEffectLevel += (detailFreshness - this.gestureEffectLevel) * Math.min(1, 9 * delta);
+      this.gestureActive = this.mode === 'detail' && this.gestureEffectLevel > 0.02;
       const driftX = Math.sin(t * 0.19) * 0.42 + Math.sin(t * 0.71 + 0.8) * 0.08;
       const driftY = Math.cos(t * 0.16) * 0.34 + Math.cos(t * 0.58 + 0.4) * 0.06;
       const pulse = 0.45 + 0.55 * Math.sin(t * 0.26 + 0.5);
       const sound = this.soundLevel;
       const handEnergy = Math.max(0.25, this.handGestureEnergy);
-      const lensStrength = handFreshness > 0
-        ? Math.min(1, handFreshness * (0.42 + handEnergy * 0.54) + pulse * 0.06)
+      const lensStrength = this.gestureActive
+        ? Math.min(1, this.gestureEffectLevel * (0.65 + handEnergy * 0.28) + pulse * 0.04)
         : 0;
       const clarityGlow = 0.28 + pulse * 0.18;
 
       this.root.style.setProperty('--visual-breath-blur', `${(0.3 + breath * 0.95).toFixed(2)}px`);
       this.root.style.setProperty('--visual-clarity-glow', clarityGlow.toFixed(3));
-      this.root.style.setProperty('--video-drift-x', `${(driftX * (0.25 + handFreshness * 0.75)).toFixed(2)}px`);
-      this.root.style.setProperty('--video-drift-y', `${(driftY * (0.25 + handFreshness * 0.75)).toFixed(2)}px`);
-      this.root.style.setProperty('--video-clear-drift-x', `${(driftX * (0.12 + handFreshness * 0.38)).toFixed(2)}px`);
-      this.root.style.setProperty('--video-clear-drift-y', `${(driftY * (0.12 + handFreshness * 0.38)).toFixed(2)}px`);
+      this.root.style.setProperty('--video-drift-x', `${(driftX * 0.08).toFixed(2)}px`);
+      this.root.style.setProperty('--video-drift-y', `${(driftY * 0.08).toFixed(2)}px`);
+      this.root.style.setProperty('--video-clear-drift-x', `${(driftX * 0.04).toFixed(2)}px`);
+      this.root.style.setProperty('--video-clear-drift-y', `${(driftY * 0.04).toFixed(2)}px`);
       this.root.style.setProperty('--lens-strength', lensStrength.toFixed(3));
-      this.root.style.setProperty('--base-video-opacity', (0.9 + sound * 0.06).toFixed(3));
-      this.root.style.setProperty('--clear-layer-opacity', Math.min(1, handFreshness * 1.8).toFixed(3));
-      this.root.style.setProperty('--lens-opacity', (lensStrength * (0.48 + sound * 0.24)).toFixed(3));
-      this.root.style.setProperty('--trace-one-opacity', (lensStrength * (0.12 + sound * 0.14 + clarityGlow * 0.08)).toFixed(3));
-      this.root.style.setProperty('--trace-two-opacity', (lensStrength * (0.09 + sound * 0.1)).toFixed(3));
-      this.root.style.setProperty('--grain-layer-opacity', (0.38 + sound * 0.24 + clarityGlow * 0.08).toFixed(3));
+      this.root.style.setProperty('--base-video-opacity', '1');
+      this.root.style.setProperty('--clear-layer-opacity', (this.gestureEffectLevel * 0.98).toFixed(3));
+      this.root.style.setProperty('--lens-opacity', (this.gestureEffectLevel * 0.84).toFixed(3));
+      this.root.style.setProperty('--trace-one-opacity', (this.gestureEffectLevel * (0.18 + sound * 0.08 + clarityGlow * 0.05)).toFixed(3));
+      this.root.style.setProperty('--trace-two-opacity', (this.gestureEffectLevel * (0.14 + sound * 0.05)).toFixed(3));
+      this.root.style.setProperty('--grain-layer-opacity', (0.14 + sound * 0.08 + this.gestureEffectLevel * 0.18).toFixed(3));
+      this.root.style.setProperty('--gesture-effect-level', this.gestureEffectLevel.toFixed(3));
+      this.root.style.setProperty('--gesture-effect-opacity', this.gestureEffectLevel.toFixed(3));
+      this.root.style.setProperty('--gesture-glitch-opacity', this.gestureEffectLevel.toFixed(3));
+      this.root.style.setProperty('--gesture-glitch-jitter-x', `${(Math.sin(t * 16.2 + this.gesturePhase) * this.gestureEffectLevel * 7.5).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-glitch-jitter-y', `${(Math.cos(t * 19.1 + this.gesturePhase * 0.7) * this.gestureEffectLevel * 5.5).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-glitch-blur', `${(this.gestureEffectLevel * 2.4).toFixed(2)}px`);
+      this.root.style.setProperty('--gesture-mask-radius', `${(12 + this.gestureEffectLevel * 10).toFixed(2)}%`);
+      this.root.dataset.gestureActive = String(this.gestureActive);
+      this.audioController.setFearIntensity(this.gestureEffectLevel);
       this.perceptionFrame = requestAnimationFrame(tick);
     };
 
@@ -317,7 +343,7 @@ export class CardController {
     if (input.mode !== 'hand') return;
     this.lastHandAt = performance.now();
 
-    const displayHandX = -Math.max(-1, Math.min(1, input.handX ?? 0));
+    const displayHandX = Math.max(-1, Math.min(1, input.handX ?? 0));
     const lensX = 50 + displayHandX * 34;
     const lensY = 50 + Math.max(-1, Math.min(1, input.handY ?? 0)) * 28;
     const openness = Math.max(input.openness ?? 0, input.spread ?? 0);
@@ -340,8 +366,8 @@ export class CardController {
     this.root.style.setProperty('--trace-y-1', `${this.tracePoints[0].y}%`);
     this.root.style.setProperty('--trace-x-2', `${this.tracePoints[1].x}%`);
     this.root.style.setProperty('--trace-y-2', `${this.tracePoints[1].y}%`);
-    this.root.style.setProperty('--video-shift-x', `${(displayHandX * -1.6).toFixed(2)}%`);
-    this.root.style.setProperty('--video-shift-y', `${((input.handY ?? 0) * -1.2).toFixed(2)}%`);
+    this.root.style.setProperty('--video-shift-x', `${(displayHandX * 1.6).toFixed(2)}%`);
+    this.root.style.setProperty('--video-shift-y', `${((input.handY ?? 0) * 1.2).toFixed(2)}%`);
     this.root.style.setProperty('--lens-strength', (0.55 + gestureEnergy * 0.5).toFixed(3));
 
     const selectedCard = this.cardGrid.children[this.selectedIndex];
@@ -376,11 +402,16 @@ export class CardController {
       } else if (input.handDepth < 0.28 && this.isContrasting) {
         this.toggleContrast(false);
       }
+
+      const interactionStrength = this.getDetailInteractionStrength(input);
+      if (interactionStrength > 0.04) {
+        this.triggerDetailGesture(interactionStrength, input);
+      }
     }
   }
 
   getIndexFromHand(input) {
-    const displayX = -Math.max(-1, Math.min(1, input.handX ?? 0));
+    const displayX = Math.max(-1, Math.min(1, input.handX ?? 0));
     return Math.min(3, Math.max(0, Math.floor(((displayX + 1) / 2) * 4)));
   }
 
@@ -445,6 +476,7 @@ export class CardController {
     if (nextIndex === this.selectedIndex) return;
     this.selectedIndex = nextIndex;
     this.isContrasting = false;
+    this.resetGestureState(true);
     this.message(`已选中：${this.selectedScene.title}`, 'ready');
     this.render();
   }
@@ -454,9 +486,8 @@ export class CardController {
     this.mode = 'detail';
     this.clearHoverState();
     this.isContrasting = false;
-    if (!this.soundEnabled) {
-      this.setSoundEnabled(true);
-    }
+    this.resetGestureState(true);
+    void this.prepareSilentAudio();
     this.message(`进入场景：${this.selectedScene.title}`, 'ready');
     this.render();
   }
@@ -467,6 +498,7 @@ export class CardController {
     this.mode = 'hub';
     this.clearHoverState();
     this.isContrasting = false;
+    this.resetGestureState(true);
     this.message('已返回四个场景卡片', 'ready');
     this.render();
   }
@@ -481,5 +513,55 @@ export class CardController {
     this.isContrasting = force === null ? !this.isContrasting : force;
     this.message(this.isContrasting ? '正在查看对照视角' : '已回到场景叙事', 'ready');
     this.render();
+  }
+
+  resetGestureState(disableSound = true) {
+    this.gestureActive = false;
+    this.gestureEffectLevel = 0;
+    this.lastGestureAt = 0;
+    this.lastDetailInteractionAt = 0;
+    this.root.dataset.gestureActive = 'false';
+    this.root.style.setProperty('--gesture-effect-level', '0');
+    this.root.style.setProperty('--gesture-effect-opacity', '0');
+    this.root.style.setProperty('--gesture-glitch-opacity', '0');
+    this.root.style.setProperty('--gesture-glitch-jitter-x', '0px');
+    this.root.style.setProperty('--gesture-glitch-jitter-y', '0px');
+    this.root.style.setProperty('--gesture-glitch-blur', '0px');
+    this.root.style.setProperty('--gesture-mask-radius', '12%');
+    this.audioController.setFearIntensity(0);
+    if (disableSound && this.soundEnabled) {
+      this.setSoundEnabled(false, false);
+    }
+  }
+
+  getDetailInteractionStrength(input) {
+    const motion = Math.max(
+      Math.abs(input.deltaX ?? 0) * 16,
+      Math.abs(input.deltaY ?? 0) * 16,
+      Math.abs(input.scaleDelta ?? 0) * 8,
+      input.motionEnergy ?? 0,
+    );
+    const pose = Math.max(input.openness ?? 0, input.spread ?? 0);
+    const extra = (input.isPinching ? 0.22 : 0) + (input.isFist ? 0.18 : 0) + (input.swipe ? 0.28 : 0);
+    return Math.min(1, motion + pose * 0.18 + extra);
+  }
+
+  triggerDetailGesture(strength, input) {
+    this.lastGestureAt = performance.now();
+    this.lastDetailInteractionAt = this.lastGestureAt;
+    this.gestureEffectLevel = Math.max(this.gestureEffectLevel, Math.min(1, 0.28 + strength * 0.88));
+    this.gestureActive = true;
+    this.root.dataset.gestureActive = 'true';
+    this.root.style.setProperty('--gesture-effect-level', this.gestureEffectLevel.toFixed(3));
+    this.root.style.setProperty('--gesture-effect-opacity', this.gestureEffectLevel.toFixed(3));
+    this.root.style.setProperty('--gesture-glitch-opacity', this.gestureEffectLevel.toFixed(3));
+    this.root.style.setProperty('--gesture-mask-radius', `${(12 + this.gestureEffectLevel * 10).toFixed(2)}%`);
+    if (!this.soundEnabled) {
+      this.setSoundEnabled(true, false);
+    }
+    this.audioController.setFearIntensity(this.gestureEffectLevel);
+    if (input.swipe) {
+      this.message(input.swipe === 'left' ? '手势触发：故障层已开启' : '手势触发：故障层已开启', 'ready');
+    }
   }
 }
