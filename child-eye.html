@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050607" />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="%BASE_URL%child-eye.css" />
+    <title>Child's Eye on Me</title>
+  </head>
+  <body>
+    <main id="app" aria-label="Child's Eye on Me — live camera page">
+      <svg class="filter-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="wave-distortion" x="-14%" y="-14%" width="128%" height="128%" color-interpolation-filters="sRGB">
+          <feTurbulence id="wave-noise" type="fractalNoise" baseFrequency="0.004 0.014" numOctaves="3" seed="7" result="waves" />
+          <feGaussianBlur in="waves" stdDeviation="1.3" result="liquid-waves" />
+          <feDisplacementMap id="wave-map" in="SourceGraphic" in2="liquid-waves" scale="16" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+      <section class="stage" id="stage" aria-label="Live camera feed">
+        <div class="stage__backdrop" aria-hidden="true"></div>
+        <video id="video-base" class="layer layer--base" autoplay muted playsinline></video>
+        <video id="video-red" class="layer layer--rgb layer--red" autoplay muted playsinline></video>
+        <video id="video-cyan" class="layer layer--rgb layer--cyan" autoplay muted playsinline></video>
+        <video id="video-amber" class="layer layer--rgb layer--amber" autoplay muted playsinline></video>
+        <div id="tear-layer" class="tear-layer" aria-hidden="true"></div>
+        <div id="block-layer" class="block-layer" aria-hidden="true"></div>
+        <div class="pixel-grid" aria-hidden="true"></div>
+        <canvas id="noise" class="noise" aria-hidden="true"></canvas>
+        <div class="scanlines" aria-hidden="true"></div>
+        <div class="poster-frame" aria-hidden="true">
+          <span class="corner corner--tl"></span>
+          <span class="corner corner--tr"></span>
+          <span class="corner corner--bl"></span>
+          <span class="corner corner--br"></span>
+          <span class="side-code side-code--left">SIGNAL / MISREAD</span>
+          <span class="side-code side-code--right">MEMORY RECOVERY</span>
+        </div>
+        <div class="vignette" aria-hidden="true"></div>
+        <div class="flash" id="flash" aria-hidden="true"></div>
+      </section>
+
+      <header class="hud hud--top">
+        <div class="title-block">
+          <p class="eyebrow" data-glitch-text>FAULT / CHILD PERSPECTIVE</p>
+          <h1 data-glitch-text>MISOPEDIA</h1>
+          <span class="subtitle" data-glitch-text>Child's Eye on Me</span>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite">Requesting camera & microphone</p>
+      </header>
+
+      <footer class="hud hud--bottom">
+        <div class="meter" aria-hidden="true">
+          <span id="meter-fill"></span>
+        </div>
+        <div class="readout" aria-hidden="true">
+          <span id="readout-label">Silent</span>
+          <span id="readout-level">0%</span>
+        </div>
+        <p class="bottom-code" aria-hidden="true">
+          <span id="frame-time">00:00:00</span>
+          <span>UNSTABLE SIGNAL</span>
+        </p>
+      </footer>
+
+      <div class="voice-dock" id="voice-dock">
+        <button
+          id="voice-panel-toggle"
+          class="voice-panel-toggle"
+          type="button"
+          aria-label="Hide voice changer"
+          aria-expanded="true"
+          aria-controls="voice-panel"
+        >
+          <i class="voice-panel-toggle__icon" data-lucide="minus" aria-hidden="true"></i>
+        </button>
+
+        <aside class="voice-panel" id="voice-panel" aria-label="Live voice changer">
+          <div class="voice-panel__head">
+            <div>
+              <p class="voice-panel__kicker">MIC / FX / SPEAKER</p>
+              <h2>Voice Changer</h2>
+              <p class="voice-panel__meta">Mic input · speaker output</p>
+            </div>
+            <div class="voice-panel__actions">
+              <label class="toggle" for="monitor-toggle">
+                <input id="monitor-toggle" type="checkbox" checked />
+                <span class="toggle__rail" aria-hidden="true"></span>
+                <span class="toggle__text">Monitor</span>
+              </label>
+              <button id="voice-panel-minimize" class="voice-panel__minimize" type="button" aria-label="Hide voice changer" title="Hide voice changer">
+                <i data-lucide="minus" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <div class="voice-controls">
+            <label class="voice-control" for="mix">
+              <span class="voice-control__row">
+                <span>Mix</span>
+                <output id="mix-value">58%</output>
+              </span>
+              <input id="mix" type="range" min="0" max="100" value="58" />
+            </label>
+            <label class="voice-control" for="pitch">
+              <span class="voice-control__row">
+                <span>Pitch</span>
+                <output id="pitch-value">0.88x</output>
+              </span>
+              <input id="pitch" type="range" min="40" max="160" value="88" />
+            </label>
+            <label class="voice-control" for="tone">
+              <span class="voice-control__row">
+                <span>Tone</span>
+                <output id="tone-value">42%</output>
+              </span>
+              <input id="tone" type="range" min="0" max="100" value="42" />
+            </label>
+            <label class="voice-control" for="echo">
+              <span class="voice-control__row">
+                <span>Echo</span>
+                <output id="echo-value">18%</output>
+              </span>
+              <input id="echo" type="range" min="0" max="100" value="18" />
+            </label>
+            <label class="voice-control" for="drive">
+              <span class="voice-control__row">
+                <span>Drive</span>
+                <output id="drive-value">12%</output>
+              </span>
+              <input id="drive" type="range" min="0" max="100" value="12" />
+            </label>
+            <label class="voice-control" for="glitch">
+              <span class="voice-control__row">
+                <span>Glitch</span>
+                <output id="glitch-value">20%</output>
+              </span>
+              <input id="glitch" type="range" min="0" max="100" value="20" />
+            </label>
+            <label class="voice-control" for="monster">
+              <span class="voice-control__row">
+                <span>Monster</span>
+                <output id="monster-value">0%</output>
+              </span>
+              <input id="monster" type="range" min="0" max="100" value="0" />
+            </label>
+            <label class="voice-control" for="output">
+              <span class="voice-control__row">
+                <span>Output</span>
+                <output id="output-value">50%</output>
+              </span>
+              <input id="output" type="range" min="0" max="100" value="50" />
+            </label>
+          </div>
+        </aside>
+      </div>
+
+      <button id="retry" class="retry" type="button" hidden>Retry</button>
+      <p id="error" class="error" hidden></p>
+    </main>
+    <script type="module" src="./src/child-eye.js"></script>
+  </body>
+</html>
