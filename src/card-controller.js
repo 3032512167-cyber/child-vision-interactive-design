@@ -143,9 +143,8 @@ export class CardController {
       button.dataset.index = String(index);
       button.style.setProperty('--scene-accent', scene.accent);
       button.style.setProperty('--scene-warm', scene.warm);
-      button.setAttribute('aria-label', `选择场景：${scene.title}`);
+      button.setAttribute('aria-label', `Select scene: ${scene.title}`);
 
-      const metrics = scene.metrics.map((item) => `<span>${item}</span>`).join('');
       button.innerHTML = `
         <span class="topic-card__media" aria-hidden="true">
           <img src="${scene.image}" alt="" />
@@ -158,7 +157,6 @@ export class CardController {
         <span class="topic-card__body">
           <span class="topic-card__title">${scene.title}</span>
           <span class="topic-card__subtitle">${scene.subtitle}</span>
-          <span class="topic-card__metrics">${metrics}</span>
         </span>
         <span class="topic-card__dwell" aria-hidden="true"><span></span></span>
         <span class="topic-card__enter" aria-hidden="true"><span class="play-mark"></span></span>
@@ -294,7 +292,7 @@ export class CardController {
     try {
       await this.audioController.prepareSilentAudio();
     } catch (error) {
-      this.message(error.message || '无法预热音频。', 'error');
+      this.message(error.message || 'Unable to warm up audio.', 'error');
     }
   }
 
@@ -335,7 +333,7 @@ export class CardController {
       this.soundListener?.(false);
       this.detailVideo.muted = true;
       this.detailVideo.play().catch(() => {});
-      this.message('浏览器拦截了自动原声，请点击音量图标开启。', 'paused');
+      this.message('Autoplay sound was blocked. Click the volume icon to enable.', 'paused');
     });
   }
 
@@ -343,7 +341,7 @@ export class CardController {
     this.micEnabled = await this.audioController.setMicEnabled(enabled);
     this.micListener?.(this.micEnabled);
     if (!this.micEnabled) {
-      this.message('麦克风声音响应已关闭', 'ready');
+      this.message('Microphone sound response off', 'ready');
     }
     return this.micEnabled;
   }
@@ -500,7 +498,7 @@ export class CardController {
       if (pinchDown) {
         this.detailSwitchArmedUntil = now + 2200;
         this.triggerDetailGesture(0.3, input);
-        this.message('切换模式：2 秒内左右挥动切换场景', 'ready');
+        this.message('Mode switch: swipe left/right within 2s to change scenes', 'ready');
         return;
       }
 
@@ -514,7 +512,7 @@ export class CardController {
 
         if (now - this.lastIgnoredDetailSwipeAt > 1400) {
           this.lastIgnoredDetailSwipeAt = now;
-          this.message('场景内已锁定：先捏合，再左右挥动切换场景', 'ready');
+          this.message('Scene locked: pinch first, then swipe to switch scenes', 'ready');
         }
       }
 
@@ -544,7 +542,7 @@ export class CardController {
       this.hoverProgress = 0;
       this.hoverAnnouncedSecond = 5;
       this.syncHoverProgress();
-      this.message(`停留 5 秒确认：${SCENE_CARDS[index].title}`, 'ready');
+      this.message(`Hold 5s to confirm: ${SCENE_CARDS[index].title}`, 'ready');
       return;
     }
 
@@ -555,7 +553,7 @@ export class CardController {
     const remaining = Math.max(0, Math.ceil((this.hoverConfirmMs - elapsed) / 1000));
     if (remaining !== this.hoverAnnouncedSecond && this.hoverProgress < 1) {
       this.hoverAnnouncedSecond = remaining;
-      if (remaining > 0) this.message(`停留 ${remaining} 秒确认场景`, 'ready');
+      if (remaining > 0) this.message(`Hold ${remaining}s to confirm`, 'ready');
     }
 
     if (this.hoverProgress >= 1) {
@@ -598,7 +596,7 @@ export class CardController {
     this.selectedIndex = nextIndex;
     this.isContrasting = false;
     this.resetGestureState(true);
-    this.message(`已选中：${this.selectedScene.title}`, 'ready');
+    this.message(`Selected: ${this.selectedScene.title}`, 'ready');
     this.render();
     if (this.mode === 'hub') {
       this.scrollSelectedCardIntoView('smooth');
@@ -612,7 +610,7 @@ export class CardController {
     this.isContrasting = false;
     this.resetGestureState(true);
     void this.prepareSilentAudio();
-    this.message(`进入场景：${this.selectedScene.title}`, 'ready');
+    this.message(`Entered scene: ${this.selectedScene.title}`, 'ready');
     this.render();
   }
 
@@ -623,7 +621,7 @@ export class CardController {
     this.clearHoverState();
     this.isContrasting = false;
     this.resetGestureState(true);
-    this.message('已返回四个场景卡片', 'ready');
+    this.message('Returned to the four scenes', 'ready');
     this.render();
   }
 
@@ -635,7 +633,7 @@ export class CardController {
   toggleContrast(force = null) {
     if (this.mode !== 'detail') return;
     this.isContrasting = force === null ? !this.isContrasting : force;
-    this.message(this.isContrasting ? '正在查看对照视角' : '已回到场景叙事', 'ready');
+    this.message(this.isContrasting ? 'Viewing contrast perspective' : 'Back to scene narrative', 'ready');
     this.render();
   }
 
@@ -711,7 +709,7 @@ export class CardController {
     }
     this.audioController.setFearIntensity(this.lensAudioIntensity);
     if (input.swipe) {
-      this.message(input.swipe === 'left' ? '手势触发：故障层已开启' : '手势触发：故障层已开启', 'ready');
+      this.message(input.swipe === 'left' ? 'Gesture: glitch layer enabled' : 'Gesture: glitch layer enabled', 'ready');
     }
   }
 }

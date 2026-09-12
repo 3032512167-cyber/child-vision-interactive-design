@@ -237,6 +237,36 @@ button {
   pointer-events: none;
 }
 
+.intro-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(4, 6, 11, 0.3) 0%, rgba(4, 6, 11, 0.8) 100%);
+  animation: intro-hint-fade 4.4s ease-in-out forwards;
+}
+
+.intro-hint span {
+  max-width: 34ch;
+  padding: 0 24px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: clamp(20px, 2.5vw, 30px);
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.85);
+}
+
+@keyframes intro-hint-fade {
+  0% { opacity: 0; }
+  9% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
 .experience-topline {
   display: flex;
   width: min(1240px, 100%);

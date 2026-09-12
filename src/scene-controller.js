@@ -31,10 +31,10 @@ export class SceneController {
     this.spriteMaterials = [];
     this.spriteObjects = [];
     this.visualThemes = [
-      { name: '长途交通', summary: '密闭空间中的噪声压力和疲惫被放大。', core: 0xff0f68, accent: CYAN, warm: GOLD, shell: 0x5b172c, inner: 0xff8db5 },
-      { name: '餐饮场所', summary: '等待、气味和灯光让儿童感官持续过载。', core: 0xff4f93, accent: GOLD, warm: CYAN, shell: 0x64233e, inner: 0xffb3cd },
-      { name: '商场空间', summary: '消费动线和强刺激制造冲突。', core: 0xd779ff, accent: CYAN, warm: MAGENTA, shell: 0x462461, inner: 0xdcb3ff },
-      { name: '景点场馆', summary: '长队和观看规则让亲子家庭被排斥。', core: GOLD, accent: 0xff0f68, warm: CYAN, shell: 0x5e431b, inner: 0xffd58a },
+      { name: 'Long-distance Travel', summary: 'Noise pressure and fatigue are amplified in enclosed spaces.', core: 0xff0f68, accent: CYAN, warm: GOLD, shell: 0x5b172c, inner: 0xff8db5 },
+      { name: 'Dining Venues', summary: 'Waiting, smells, and light keep a child overstimulated.', core: 0xff4f93, accent: GOLD, warm: CYAN, shell: 0x64233e, inner: 0xffb3cd },
+      { name: 'Shopping Malls', summary: 'Consumer flow and heavy stimulation create conflict.', core: 0xd779ff, accent: CYAN, warm: MAGENTA, shell: 0x462461, inner: 0xdcb3ff },
+      { name: 'Attractions & Venues', summary: 'Long queues and viewing rules exclude families.', core: GOLD, accent: 0xff0f68, warm: CYAN, shell: 0x5e431b, inner: 0xffd58a },
     ];
     this.sceneListener = null;
 

@@ -68,10 +68,10 @@ export class GestureController {
 
   async startCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('当前浏览器不支持摄像头访问，请使用鼠标或触摸拖拽。');
+      throw new Error('Camera access is not supported by this browser. Use mouse or touch to drag.');
     }
 
-    this.setStatus('正在连接摄像头', 'idle');
+    this.setStatus('Connecting camera', 'idle');
     this.stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
@@ -88,7 +88,7 @@ export class GestureController {
 
     this.resizeOverlay();
 
-    this.setStatus('正在加载手势识别', 'idle');
+    this.setStatus('Loading gesture recognition', 'idle');
     const vision = await FilesetResolver.forVisionTasks(TASKS_WASM_URL);
     this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
       baseOptions: {
@@ -105,7 +105,7 @@ export class GestureController {
     });
 
     this.lastMode = 'hand';
-    this.setStatus('移动手掌带动图形', 'ready');
+    this.setStatus('Move your palm to steer the visuals', 'ready');
     this.trackHand();
   }
 
@@ -122,7 +122,7 @@ export class GestureController {
         this.previousVideoTime = this.video.currentTime;
         this.consumeHandResult(result, now);
       } catch (error) {
-        this.setStatus('手势识别正在恢复', 'lost');
+        this.setStatus('Gesture recognition recovering', 'lost');
       }
     }
 
@@ -137,7 +137,7 @@ export class GestureController {
       this.lastMode = 'idle';
       this.emit(this.createInput({ mode: 'idle' }));
       this.clearOverlay();
-      this.setStatus('请将整只手放入预览框', 'lost');
+      this.setStatus('Place your whole hand in the preview box', 'lost');
     }
 
     this.animationFrame = requestAnimationFrame(this.trackHand);
@@ -179,7 +179,7 @@ export class GestureController {
         isFist: false,
         isPaused: true,
       }));
-      this.setStatus('捏合已识别', 'ready');
+      this.setStatus('Pinch detected', 'ready');
       return;
     }
 
@@ -200,7 +200,7 @@ export class GestureController {
         isPinching: false,
         isFist,
       }));
-      this.setStatus('手势已连接', 'ready');
+      this.setStatus('Gestures connected', 'ready');
       return;
     }
 
@@ -215,10 +215,10 @@ export class GestureController {
     this.previousOpenness = openness;
 
     if (swipe) {
-      this.setStatus(swipe === 'left' ? '向左滑动' : '向右滑动', 'ready');
+      this.setStatus(swipe === 'left' ? 'Swipe left' : 'Swipe right', 'ready');
     } else if (Math.abs(scaleDelta) > 0.008 && timestamp - this.lastActionStatusAt > 180) {
       this.lastActionStatusAt = timestamp;
-      this.setStatus(scaleDelta > 0 ? '张开放大' : '握紧缩小', 'ready');
+      this.setStatus(scaleDelta > 0 ? 'Open to zoom in' : 'Fist to zoom out', 'ready');
     }
 
     const handX = this.toHandAxis(pointer.x);
@@ -254,7 +254,7 @@ export class GestureController {
       previous = { x: event.clientX, y: event.clientY };
       target.setPointerCapture?.(event.pointerId);
       this.emit(this.createInput({ mode: 'pointer' }));
-      if (!this.handLandmarker) this.setStatus('拖拽控制中', 'ready');
+      if (!this.handLandmarker) this.setStatus('Dragging', 'ready');
     });
 
     target.addEventListener('pointermove', (event) => {
@@ -269,7 +269,7 @@ export class GestureController {
       if (event.pointerId !== activePointerId) return;
       activePointerId = null;
       previous = null;
-      if (!this.handLandmarker) this.setStatus('鼠标拖拽可旋转', 'idle');
+      if (!this.handLandmarker) this.setStatus('Drag to rotate', 'idle');
     };
 
     target.addEventListener('pointerup', releasePointer);

@@ -29,7 +29,7 @@ export class AudioController {
   setSoundEnabled(enabled, shouldPlay = true) {
     this.soundEnabled = Boolean(enabled);
     this.applyVideoState(shouldPlay).catch((error) => {
-      this.onMessage?.(error.message || '无法开启视频原声。', 'error');
+      this.onMessage?.(error.message || 'Unable to enable original sound.', 'error');
     });
     return this.soundEnabled;
   }
@@ -60,7 +60,7 @@ export class AudioController {
 
   async startMic() {
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('当前浏览器不支持麦克风输入。');
+      throw new Error('Microphone input is not supported by this browser.');
     }
 
     await this.ensureGraph();
@@ -78,7 +78,7 @@ export class AudioController {
     this.micData = new Uint8Array(this.micAnalyser.frequencyBinCount);
     this.micSource.connect(this.micAnalyser);
     this.micEnabled = true;
-    this.onMessage?.('麦克风已连接：声音会放大并变尖锐', 'ready');
+    this.onMessage?.('Microphone connected: sound will be amplified and sharpened', 'ready');
     this.tickMic();
   }
 
@@ -102,7 +102,7 @@ export class AudioController {
     if (!this.context) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) {
-        throw new Error('当前浏览器不支持 Web Audio。');
+        throw new Error('Web Audio is not supported by this browser.');
       }
 
       this.context = new AudioContextClass();
@@ -167,7 +167,7 @@ export class AudioController {
     if (shouldPlay) {
       this.video.play?.().catch(() => {
         this.video.muted = true;
-        this.onMessage?.('浏览器拦截了自动原声，请再点击一次音量图标。', 'paused');
+        this.onMessage?.('Autoplay sound was blocked. Click the volume icon again.', 'paused');
       });
     }
   }

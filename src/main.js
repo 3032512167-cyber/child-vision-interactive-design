@@ -27,7 +27,7 @@ try {
   scene.setReaderMode('hub');
 } catch (error) {
   unsupportedMessage.hidden = false;
-  unsupportedMessage.textContent = '当前浏览器无法启用 WebGL，请使用最新版 Chrome、Edge 或 Safari。';
+  unsupportedMessage.textContent = 'WebGL is unavailable in this browser. Please use the latest Chrome, Edge, or Safari.';
   throw error;
 }
 
@@ -37,16 +37,16 @@ gestures.connectPointer(scene.renderer.domElement);
 
 const syncSoundButton = (enabled) => {
   soundButton.setAttribute('aria-pressed', String(enabled));
-  soundButton.setAttribute('aria-label', enabled ? '关闭视频原声' : '开启视频原声');
-  soundButton.setAttribute('title', enabled ? '关闭视频原声' : '开启视频原声');
+  soundButton.setAttribute('aria-label', enabled ? 'Disable original sound' : 'Enable original sound');
+  soundButton.setAttribute('title', enabled ? 'Disable original sound' : 'Enable original sound');
   soundButton.innerHTML = `<i data-lucide="${enabled ? 'volume-2' : 'volume-x'}" aria-hidden="true"></i>`;
   createIcons({ icons: { Camera, Mic, MicOff, MousePointer2, Volume2, VolumeX }, attrs: { 'stroke-width': 1.8 } });
 };
 
 const syncMicButton = (enabled) => {
   micButton.setAttribute('aria-pressed', String(enabled));
-  micButton.setAttribute('aria-label', enabled ? '关闭麦克风声音响应' : '开启麦克风声音响应');
-  micButton.setAttribute('title', enabled ? '关闭麦克风声音响应' : '开启麦克风声音响应');
+  micButton.setAttribute('aria-label', enabled ? 'Disable microphone sound response' : 'Enable microphone sound response');
+  micButton.setAttribute('title', enabled ? 'Disable microphone sound response' : 'Enable microphone sound response');
   micButton.innerHTML = `<i data-lucide="${enabled ? 'mic' : 'mic-off'}" aria-hidden="true"></i>`;
   createIcons({ icons: { Camera, Mic, MicOff, MousePointer2, Volume2, VolumeX }, attrs: { 'stroke-width': 1.8 } });
 };
@@ -70,11 +70,11 @@ cards.onSceneChange(({ index, mode, scene: selectedScene, direction }) => {
   app.style.setProperty('--scene-warm', selectedScene.warm);
 });
 
-setStatus('选择中间四个厌童观察场景', 'ready');
+setStatus('Select from the four scenes', 'ready');
 const compactLayout = window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(pointer: coarse)').matches;
 if (compactLayout) {
-  setStatus('左右滑动浏览四个场景，点击卡片进入', 'ready');
-  dragHint.querySelector('span').textContent = '左右滑动浏览';
+  setStatus('Swipe to browse the scenes, tap a card to enter', 'ready');
+  dragHint.querySelector('span').textContent = 'Swipe to browse';
 }
 syncSoundButton(cards.soundEnabled);
 syncMicButton(cards.micEnabled);
@@ -95,7 +95,7 @@ gestures.onStatus(({ text, state }) => setStatus(text, state));
 
 cameraButton.addEventListener('click', async () => {
   cameraButton.disabled = true;
-  cameraButton.querySelector('span').textContent = '正在连接';
+  cameraButton.querySelector('span').textContent = 'Connecting';
   try {
     void cards.prepareSilentAudio();
     await gestures.startCamera();
@@ -105,11 +105,11 @@ cameraButton.addEventListener('click', async () => {
     cameraPreview.setAttribute('aria-hidden', 'false');
   } catch (error) {
     const errorText = error.name === 'NotAllowedError'
-      ? '摄像头未授权，已切换至鼠标拖拽。'
-      : error.message || '无法启动摄像头，已切换至鼠标拖拽。';
+      ? 'Camera permission denied. Switched to mouse dragging.'
+      : error.message || 'Unable to start camera. Switched to mouse dragging.';
     setStatus(errorText, 'error');
     cameraButton.disabled = false;
-    cameraButton.querySelector('span').textContent = '重试摄像头';
+    cameraButton.querySelector('span').textContent = 'Retry camera';
   }
 });
 
@@ -122,7 +122,7 @@ micButton.addEventListener('click', async () => {
   try {
     syncMicButton(await cards.toggleMic());
   } catch (error) {
-    setStatus(error.message || '麦克风连接失败', 'error');
+    setStatus(error.message || 'Microphone connection failed', 'error');
   } finally {
     micButton.disabled = false;
   }
